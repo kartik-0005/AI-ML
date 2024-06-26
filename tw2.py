@@ -1,44 +1,66 @@
-from collections import deque
+SuccList = {
+    'S': [['A', 3], ['B', 6], ['C', 5]],
+    'A': [['E', 8], ['D', 9]],
+    'B': [['G', 14], ['F', 12]],
+    'C': [['H', 7]],
+    'H': [['J', 6], ['I', 5]],
+    'I': [['M', 2], ['L', 10], ['K', 1]]
+}  # Graph(Tree) List
 
-def best_first_search(start, goal, graph):
-    visited = set()
-    open_list = deque([[start, 0]])  # Use deque for efficient pop from the front
-    closed_list = set()
+Start = input("Enter Source node >> ").upper()
+Goal = input('Enter Goal node >> ').upper()
+Closed = list()
+SUCCESS = True
+FAILURE = False
+State = FAILURE
 
-    while open_list:
-        # Pop the node with the lowest cost
-        curNode, curCost = open_list.popleft()
-        closed_list.add(curNode)
+def GOALTEST(N):
+    return N == Goal
 
-        print(f"At node {curNode}")
-        print(f"CLOSED: {closed_list}")
+def MOVEGEN(N):
+    return SuccList.get(N, [])
 
-        if curNode == goal:
-            print("Goal node reached\n")
-            return True
+def APPEND(L1, L2):
+    return list(L1) + list(L2)
 
-        for neighbor, cost in graph[curNode]:
-            if neighbor not in visited and neighbor not in closed_list:
-                open_list.append([neighbor, curCost + cost])
-                visited.add(neighbor)
+def SORT(L):
+    L.sort(key=lambda x: x[1])
+    return L
 
-        print(f"UNSORTED OPEN: {list(open_list)}")
-        open_list = deque(sorted(open_list, key=lambda x: x[1]))  # Sort by total path cost
-        print(f"SORTED OPEN: {list(open_list)}\n")
+def BestFirstSearch():
+    OPEN = [[Start, 0]]
+    CLOSED = list()
+    global State
+    global Closed
+    i = 1
+    while len(OPEN) != 0 and State != SUCCESS:
+        print("\n<<<<<<<<<<---({})--->>>>>>>>>>\n".format(i))
+        N = OPEN[0]
+        print("N =", N)
+        del OPEN[0]  # delete the node we picked
+        if GOALTEST(N[0]) == True:
+            State = SUCCESS
+            CLOSED = APPEND(CLOSED, [N])
+            print("CLOSED =", CLOSED)
+        else:
+            CLOSED = APPEND(CLOSED, [N])
+            print("CLOSED =", CLOSED)
+            CHILD = MOVEGEN(N[0])
+            print("CHILD =", CHILD)
+            for val in OPEN:
+                if val in CHILD:
+                    CHILD.remove(val)
+            for val in CLOSED:
+                if val in CHILD:
+                    CHILD.remove(val)
+            OPEN = APPEND(CHILD, OPEN)  # append movegen elements to OPEN
+            print("Unsorted OPEN =", OPEN)
+            SORT(OPEN)
+            print("Sorted OPEN =", OPEN)
+        Closed = CLOSED
+        i += 1
+    return State
 
-    return False
-
-# Example usage:
-graph = {
-    'A': [('B', 1), ('C', 3)],
-    'B': [('D', 2), ('E', 4)],
-    'C': [('F', 5)],
-    'D': [],
-    'E': [('G', 1)],
-    'F': [('G', 2)],
-    'G': []
-}
-
-start = 'A'
-goal = 'G'
-best_first_search(start, goal, graph)
+# Code by <<<Sahil Gaonkar>>>
+result = BestFirstSearch()
+print("Best First Search Path >>>> {} <<<{}>>>".format(Closed, result))
